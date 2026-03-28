@@ -1,0 +1,288 @@
+/* 
+  1. 스타일 가이드 연동 (변수 선언) 
+  디자인 시스템의 설정값들을 SCSS 변수($)로 저장해두고 마치 '블록'처럼 필요할 때마다 꺼내 쓸 수 있게 설정합니다.
+*/
+
+// --------- 변수 선언부 ---------
+$white: #FFFFFF;
+$gray-400: #B9B9CE; /* 서브 텍스트(직함 등)에 쓰이는 부드러운 회색 */
+$gray-100: #EBEBEB;
+$gray-50:  #F4F4FC;
+$purple-500: #CF6BCB;
+$pink-500: #D3629D;
+$blue-950: #202047; /* 메인 텍스트와 타이틀에 쓰이는 진한 파란색 */
+
+$gradient-start: #9975D0;
+$gradient-end: #4A3FDB;
+
+// Typography (Font)
+$font-main: 'Inter', sans-serif;
+$font-light: 300;
+$font-medium: 500;
+$font-bold: 700;
+
+$body-font-size: 32px; // Desktop
+$body-font-size-mobile: 18px; // Mobile
+
+// Spacing Tokens
+$spacing-100: 8px;
+$spacing-200: 16px;
+$spacing-300: 24px;
+$spacing-400: 32px;
+$spacing-600: 48px;
+$spacing-800: 64px;
+$spacing-1200: 96px;
+
+// 반응형 Mixin (모바일 퍼스트: 데스크톱 화면이 시작되는 시점을 정의)
+// @include desktop { ... } 으로 감싸면 화면이 넓어질 때(1024px 이상) 추가 적용됩니다.
+@mixin desktop {
+  @media (min-width: 1024px) {
+    @content;
+  }
+}
+
+// --------- 기본 리셋 및 뼈대 ---------
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* 패딩을 넣어도 박스 크기가 커지지 않게 테두리 기준으로 고정 */
+}
+
+body {
+  font-family: $font-main;
+  color: $blue-950;
+  background-color: $white;
+  // 전체 화면 가운데 정렬, 높이를 화면 크기만큼 꽉 채움
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden; // 좌우 스크롤 튀어나가는 현상 방지
+  
+  // 왼쪽 아래로 뻗어가는 곡선 배경화면 (pattern-curve)
+  background-image: url('images/pattern-curve.svg');
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 70% auto;
+  
+  @include desktop {    
+    background-size: auto;
+  }
+}
+
+// --------- 1. 전체 영역 (메인 래퍼) ---------
+.slider-section {
+  position: relative;
+  width: 100%;
+  padding: 0; // 모바일 패딩 제거
+
+  @include desktop {
+    padding: 0; // 데스크톱 패딩 제거
+  }
+}
+
+// --------- 2. 슬라이더 창문(Container) ---------
+// 한 번에 딱 한 개의 슬라이드만 창틀 안에서 보이도록 만듭니다.
+.slider-container {
+  overflow: hidden; 
+  width: 100%;
+  position: relative;
+  padding: 0; // 패딩 제거
+}
+
+// --------- 3. 긴 필름(Track) ---------
+// 모든 슬라이드를 가로로 쭉 나열한 거대한 필름입니다.
+.slider-track {
+  display: flex; // 가로 배치
+  width: 100%;
+  align-items: center;
+  // 탭이나 화살표 버튼으로 넘어갈 때, 화면이 부드럽게 옆으로 밀리는 시각적 피드백 제공
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); 
+}
+
+// --------- 4. 개별 슬라이드(Slide) ---------
+.slide {
+  flex: 0 0 100%; // 너비를 부모 컨테이너(100%)와 동일하게 맞춤
+  display: flex;
+  flex-direction: column; // 위쪽: 사진, 아래쪽: 텍스트 (모바일)
+  align-items: center;
+  position: relative;
+  
+  @include desktop {
+    flex-direction: row-reverse; // 오른쪽: 사진, 왼쪽: 텍스트 (데스크톱)
+    justify-content: flex-end;   // 텍스트를 왼쪽으로 당김
+  }
+}
+
+// --------- 5. 비주얼 영역 (사진 + 무늬 배경) ---------
+.slide-visual {
+  position: relative;
+  width: 100%;
+  max-width: 254px; // 모바일용 프로필 이미지 크기
+  margin: 0 auto 82px; // 사진 아래 여백
+  flex-shrink: 0; 
+  
+  @include desktop {
+    max-width: 540px; // 데스크톱 프로필 크기
+    margin: 0;
+    // 부모 flex에서 오른쪽 끝으로 밀기 위해 width 고정
+  }
+  
+  // 뒤에 깔리는 보라색 곡선 무늬창
+  .bg-pattern {
+    position: absolute;
+    top: 53.5%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 326px;  // 배경 무늬 너비
+    height: 327px; // 배경 무늬 높이
+    padding-top: 24px; // 상단 여백
+    z-index: -1; // 사진 뒤로 가도록 설정
+    
+    @include desktop {
+      width: 130%; // 데스크톱에서는 배경 무늬를 더 크게
+    }
+  }
+  
+  // 인물 사진
+  .profile-image {
+    width: 100%; // 부모 max-width에 비례
+    padding-top: 54px; // 상단 여백
+    border-radius: 5px;
+    box-shadow: 0 40px 50px -30px rgba(#242471, 0.495); // 그림자: Y 40px, 번짐 50px, 축소 -30px, 색상 #242471 불투명도 49.5%
+  }
+}
+
+// --------- 6. 텍스트 영역 (인용구 + 정보) ---------
+.slide-content {
+  text-align: center;
+  position: relative;
+  z-index: 2; // 배경보다 위로 뜨게 설정
+  padding: 0 $spacing-400; // 좌우 여백 32px
+  
+  @include desktop {
+    text-align: left; // 데스크톱에서는 좌측 정렬
+    padding-right: $spacing-600; // 사진과 살짝 겹치듯 여백을 주어, 왼쪽으로 치우치게 함
+    transform: translateX(10%); // 사진 영역 위로 텍스트를 살짝 당겨오는 효과
+  }
+  
+  // 큰 따옴표 (배경 요소)
+  &::before {
+    content: '';
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 50px;
+    background-image: url('images/pattern-quotes.svg');
+    background-repeat: no-repeat;
+    background-size: contain;
+    z-index: -1;
+    
+    @include desktop {
+      top: -60px;
+      left: 15%; // 데스크톱에선 텍스트 시작점 위쪽 부근에 배치
+      width: 120px;
+      height: 100px;
+    }
+  }
+
+  // 본문 문구 (인용구)
+  .quote {
+    font-size: $body-font-size-mobile; // 18px
+    line-height: 1.35; // 135%
+    font-weight: $font-light; // 300
+    margin-bottom: $spacing-200; // 16px
+    
+    @include desktop {
+      font-size: $body-font-size;
+      margin-bottom: $spacing-600;
+      line-height: 1.4;
+    }
+  }
+  
+  // 직함, 이름 영역
+  .author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    
+    @include desktop {
+      flex-direction: row; // 이름과 직함을 한 줄로
+      align-items: center;
+      gap: $spacing-200;
+    }
+    
+    .author-name {
+      font-weight: $font-bold;
+    }
+    .author-title {
+      font-weight: $font-medium;
+      color: $gray-400; // 회색 처리로 우선순위를 낮춤 (시각적 일관성)
+    }
+  }
+}
+
+// --------- 7. 네비게이션(이전/다음) 컨트롤러 ---------
+.slider-controls {
+  position: absolute;
+  top: 51%; // 모바일: 이미지 하단 쪽에 배치
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  width: 80px;  // 컨트롤러 너비
+  height: 40px; // 컨트롤러 높이
+  background: $white;
+  border-radius: 30px; // 모서리 둥글게, 알약 모양
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); // 살짝 뜨게 만듦
+  overflow: hidden; // 버튼 둥근 모서리가 삐져나가지 않게
+  z-index: 10;
+  
+  @include desktop {
+    // 데스크톱: 이미지 왼쪽 아래 모서리 쪽에 걸치도록 배치
+    top: auto; 
+    bottom: 60px;
+    left: 60%; 
+  }
+
+  .nav-btn {
+    border: none;
+    background: transparent;
+    flex: 1;            // 컨트롤러 너비를 두 버튼이 균등하게 나눔 (각 40px)
+    display: flex;
+    align-items: center;     // 세로 가운데 정렬
+    justify-content: center; // 가로 가운데 정렬
+    cursor: pointer;
+    // 마우스를 올렸을 때 서서히 배경색이 변하는 효과 (사용자 상호작용 피드백)
+    transition: background-color 0.2s ease;
+    
+    &:hover, &:focus {
+      background-color: $gray-50;
+    }
+    
+    img {
+      width: 6px;  // 화살표 너비
+      height: 11px; // 화살표 높이
+    }
+  }
+}
+
+// 하단 크레딧
+.attribution {
+  font-size: 11px;
+  text-align: center;
+  padding: $spacing-200;
+  margin-top: $spacing-600;
+  color: $gray-400;
+  
+  a {
+    color: $blue-950;
+    font-weight: $font-bold;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

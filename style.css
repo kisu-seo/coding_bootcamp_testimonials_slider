@@ -1,0 +1,231 @@
+@charset "UTF-8";
+/* 
+  1. 스타일 가이드 연동 (변수 선언) 
+  디자인 시스템의 설정값들을 SCSS 변수($)로 저장해두고 마치 '블록'처럼 필요할 때마다 꺼내 쓸 수 있게 설정합니다.
+*/
+/* 서브 텍스트(직함 등)에 쓰이는 부드러운 회색 */
+/* 메인 텍스트와 타이틀에 쓰이는 진한 파란색 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* 패딩을 넣어도 박스 크기가 커지지 않게 테두리 기준으로 고정 */
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  color: #202047;
+  background-color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+  background-image: url("images/pattern-curve.svg");
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 70% auto;
+}
+@media (min-width: 1024px) {
+  body {
+    background-size: auto;
+  }
+}
+
+.slider-section {
+  position: relative;
+  width: 100%;
+  padding: 0;
+}
+@media (min-width: 1024px) {
+  .slider-section {
+    padding: 0;
+  }
+}
+
+.slider-container {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  padding: 0;
+}
+
+.slider-track {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.slide {
+  flex: 0 0 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+@media (min-width: 1024px) {
+  .slide {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+  }
+}
+
+.slide-visual {
+  position: relative;
+  width: 100%;
+  max-width: 254px;
+  margin: 0 auto 82px;
+  flex-shrink: 0;
+}
+@media (min-width: 1024px) {
+  .slide-visual {
+    max-width: 540px;
+    margin: 0;
+  }
+}
+.slide-visual .bg-pattern {
+  position: absolute;
+  top: 53.5%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 326px;
+  height: 327px;
+  padding-top: 24px;
+  z-index: -1;
+}
+@media (min-width: 1024px) {
+  .slide-visual .bg-pattern {
+    width: 130%;
+  }
+}
+.slide-visual .profile-image {
+  width: 100%;
+  padding-top: 54px;
+  border-radius: 5px;
+  box-shadow: 0 40px 50px -30px rgba(36, 36, 113, 0.495);
+}
+
+.slide-content {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: 0 32px;
+}
+@media (min-width: 1024px) {
+  .slide-content {
+    text-align: left;
+    padding-right: 48px;
+    transform: translateX(10%);
+  }
+}
+.slide-content::before {
+  content: "";
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 50px;
+  background-image: url("images/pattern-quotes.svg");
+  background-repeat: no-repeat;
+  background-size: contain;
+  z-index: -1;
+}
+@media (min-width: 1024px) {
+  .slide-content::before {
+    top: -60px;
+    left: 15%;
+    width: 120px;
+    height: 100px;
+  }
+}
+.slide-content .quote {
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 300;
+  margin-bottom: 16px;
+}
+@media (min-width: 1024px) {
+  .slide-content .quote {
+    font-size: 32px;
+    margin-bottom: 48px;
+    line-height: 1.4;
+  }
+}
+.slide-content .author-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+@media (min-width: 1024px) {
+  .slide-content .author-info {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+}
+.slide-content .author-info .author-name {
+  font-weight: 700;
+}
+.slide-content .author-info .author-title {
+  font-weight: 500;
+  color: #b9b9ce;
+}
+
+.slider-controls {
+  position: absolute;
+  top: 51%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  width: 80px;
+  height: 40px;
+  background: #ffffff;
+  border-radius: 30px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  z-index: 10;
+}
+@media (min-width: 1024px) {
+  .slider-controls {
+    top: auto;
+    bottom: 60px;
+    left: 60%;
+  }
+}
+.slider-controls .nav-btn {
+  border: none;
+  background: transparent;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.slider-controls .nav-btn:hover,
+.slider-controls .nav-btn:focus {
+  background-color: #f4f4fc;
+}
+.slider-controls .nav-btn img {
+  width: 6px;
+  height: 11px;
+}
+
+.attribution {
+  font-size: 11px;
+  text-align: center;
+  padding: 16px;
+  margin-top: 48px;
+  color: #b9b9ce;
+}
+.attribution a {
+  color: #202047;
+  font-weight: 700;
+  text-decoration: none;
+}
+.attribution a:hover {
+  text-decoration: underline;
+}
+
+/*# sourceMappingURL=style.css.map */
