@@ -1,15 +1,18 @@
 @charset "UTF-8";
-/* 
-  1. 스타일 가이드 연동 (변수 선언) 
-  디자인 시스템의 설정값들을 SCSS 변수($)로 저장해두고 마치 '블록'처럼 필요할 때마다 꺼내 쓸 수 있게 설정합니다.
-*/
-/* 서브 텍스트(직함 등)에 쓰이는 부드러운 회색 */
-/* 메인 텍스트와 타이틀에 쓰이는 진한 파란색 */
+/* ===========================================
+   디자인 토큰 (Design Tokens)
+   — style-guide.md의 수치를 SCSS 변수로 추상화한 '설계도'입니다.
+   여기서 정의된 값만 수정하면 전체 UI가 일관되게 바뀝니다.
+   ⚠️ 주의: 이 파일을 수정한 뒤에는 반드시 `npx sass style.scss style.css`로
+            다시 컴파일해야 브라우저에 반영됩니다.
+   =========================================== */
+/* ===========================================
+   기본 리셋 & 뼈대
+   =========================================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  /* 패딩을 넣어도 박스 크기가 커지지 않게 테두리 기준으로 고정 */
 }
 
 body {
@@ -38,22 +41,19 @@ body {
   }
 }
 
+/* ===========================================
+   슬라이더 구조 — 3단 레이어 아키텍처
+   창문(Container) → 필름(Track) → 슬라이드(Slide)
+   =========================================== */
 .slider-section {
   position: relative;
   width: 100%;
-  padding: 0;
-}
-@media (min-width: 1024px) {
-  .slider-section {
-    padding: 0;
-  }
 }
 
 .slider-container {
   overflow: hidden;
   width: 100%;
   position: relative;
-  padding: 0;
 }
 @media (min-width: 1024px) {
   .slider-container {
@@ -79,11 +79,14 @@ body {
   .slide {
     flex-direction: row;
     justify-content: flex-end;
-    padding-left: 0;
     align-items: center;
   }
 }
 
+/* ===========================================
+   비주얼 영역 (.slide-visual)
+   — .bg-pattern(배경 도형)과 .profile-image(인물 사진)의 위치 기준점
+   =========================================== */
 .slide-visual {
   position: relative;
   width: 100%;
@@ -100,8 +103,7 @@ body {
 @media (min-width: 1024px) {
   .slide-visual {
     max-width: 540px;
-    margin: 0;
-    margin-right: 165px;
+    margin: 0 165px 0 0;
     display: flex;
     align-items: center;
   }
@@ -128,8 +130,8 @@ body {
   .slide-visual .bg-pattern {
     width: 697px;
     height: 657px;
-    padding: 0;
     top: 49%;
+    padding: 0;
   }
 }
 .slide-visual .profile-image {
@@ -154,6 +156,10 @@ body {
   }
 }
 
+/* ===========================================
+   텍스트 영역 (.slide-content)
+   — 인용구, 이름, 직함을 담는 영역
+   =========================================== */
 .slide-content {
   text-align: center;
   position: relative;
@@ -185,10 +191,14 @@ body {
   background-size: contain;
   z-index: -1;
 }
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: 768px) {
   .slide-content::before {
     width: 120px;
     height: 100px;
+  }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .slide-content::before {
     top: -75px;
   }
 }
@@ -196,8 +206,6 @@ body {
   .slide-content::before {
     top: -73px;
     left: 25%;
-    width: 120px;
-    height: 100px;
   }
 }
 .slide-content .quote {
@@ -210,7 +218,6 @@ body {
   .slide-content .quote {
     font-size: 32px;
     line-height: 1.375;
-    font-weight: 300;
     margin-bottom: 32px;
     max-width: 635px;
     margin-left: auto;
@@ -219,11 +226,11 @@ body {
 }
 @media (min-width: 1024px) {
   .slide-content .quote {
+    font-size: 32px;
+    line-height: 1.4;
     width: 635px;
     margin-left: 0;
-    font-size: 32px;
     margin-bottom: 32px;
-    line-height: 1.4;
   }
 }
 .slide-content .author-info {
@@ -231,57 +238,42 @@ body {
   flex-direction: column;
   gap: 4px;
 }
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: 768px) {
   .slide-content .author-info {
     flex-direction: row;
     align-items: center;
-    justify-content: center;
     gap: 8px;
   }
 }
-@media (min-width: 1024px) {
+@media (min-width: 768px) and (max-width: 1023px) {
   .slide-content .author-info {
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
+    justify-content: center;
   }
 }
 .slide-content .author-info .author-name {
   font-weight: 700;
 }
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: 768px) {
   .slide-content .author-info .author-name {
     font-size: 20px;
     line-height: 38px;
-    font-weight: 700;
-  }
-}
-@media (min-width: 1024px) {
-  .slide-content .author-info .author-name {
-    font-size: 20px;
-    line-height: 38px;
-    font-weight: 700;
   }
 }
 .slide-content .author-info .author-title {
   font-weight: 500;
   color: #B9B9CE;
 }
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: 768px) {
   .slide-content .author-info .author-title {
     font-size: 20px;
     line-height: 38px;
-    font-weight: 500;
-  }
-}
-@media (min-width: 1024px) {
-  .slide-content .author-info .author-title {
-    font-size: 20px;
-    line-height: 38px;
-    font-weight: 500;
   }
 }
 
+/* ===========================================
+   네비게이션 컨트롤 (.slider-controls)
+   — 이전/다음 버튼을 담는 알약(pill) 모양 컨테이너
+   =========================================== */
 .slider-controls {
   position: absolute;
   top: 51%;
@@ -296,17 +288,19 @@ body {
   overflow: hidden;
   z-index: 10;
 }
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: 768px) {
   .slider-controls {
     width: 112px;
     height: 56px;
+  }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .slider-controls {
     top: 50%;
   }
 }
 @media (min-width: 1024px) {
   .slider-controls {
-    width: 112px;
-    height: 56px;
     top: auto;
     bottom: -56px;
     left: 59%;
@@ -336,6 +330,10 @@ body {
   }
 }
 
+/* ===========================================
+   하단 크레딧 (.attribution)
+   — Frontend Mentor 챌린지 출처 표기
+   =========================================== */
 .attribution {
   font-size: 11px;
   text-align: center;

@@ -5,39 +5,145 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- 웹 접근성을 위한 title (현재 어떤 페이지인지 스크린 리더에게 정확히 알려줍니다) -->
+  <!--
+    [페이지 제목 / 접근성]
+    <title>은 스크린 리더가 가장 먼저 읽는 정보입니다.
+    브라우저 탭에도 표시되므로, 페이지 내용을 명확히 요약해서 작성합니다.
+  -->
   <title>Coding Bootcamp Testimonials Slider</title>
 
-  <!-- Google Fonts: Inter 300, 500, 700 불러오기 -->
+  <!--
+    [Google Fonts 성능 최적화]
+    <link rel="preconnect">는 브라우저에게 "곧 이 서버에 연결할 거야"라고
+    미리 알려주는 힌트입니다. 폰트 파일을 실제로 요청하기 전에 TCP 연결을
+    미리 맺어 두므로, 폰트 로딩 속도가 눈에 띄게 빨라집니다.
+    fonts.gstatic.com은 실제 폰트 파일이 저장된 CDN 서버이고,
+    crossorigin 속성은 CORS(교차 출처) 인증을 위해 필수로 붙여야 합니다.
+  -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
 
-  <!-- SCSS 컴파일 후 생성된 CSS 파일 연결 -->
+  <!--
+    [CSS 연결]
+    style.css는 style.scss를 Sass 컴파일러로 변환한 결과물입니다.
+    브라우저는 SCSS를 직접 이해하지 못하므로, 반드시 컴파일된 .css 파일을 연결해야 합니다.
+    ⚠️ 주의: 스타일을 수정할 때는 style.scss를 편집한 뒤 다시 컴파일하세요.
+             style.css를 직접 편집하면 다음 컴파일 시 덮어씌워집니다.
+  -->
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <!-- 메인 랜드마크 텍스트: 페이지의 핵심 콘텐츠를 감싸는 시맨틱 태그 -->
-  <main class="slider-section">
-    <!-- 1. 창문 영역: 딱 1개의 슬라이드만 보이게 잘라내는 역할 (overflow: hidden 적용 예정) -->
-    <div class="slider-container" id="slider-container">
+  <!--
+    =====================================================
+    [전체 레이아웃 구조 요약]
 
-      <!-- 2. 긴 필름 영역: 여러 슬라이드 아이템들이 가로로 길게 이어져 있는 트랙 -->
+    <main.slider-section>          ← 1. 전체 무대 (컨트롤러 버튼의 위치 기준점)
+      <div.slider-container>       ← 2. 창문 (한 번에 슬라이드 1개만 노출)
+        <div#slider-track>         ← 3. 긴 필름 (모든 슬라이드가 가로로 나열)
+          <article.slide> × n      ← 4. 개별 사진 (각 슬라이드 카드)
+      <div.slider-controls>        ← 5. 리모컨 (이전/다음 버튼)
+
+    비유: 극장 스크린(창문)은 고정되어 있고, 필름릴(track)만 좌우로 이동하며
+    현재 상영할 장면(슬라이드)을 창문 앞으로 가져오는 구조입니다.
+    =====================================================
+  -->
+
+  <!--
+    [<main> 랜드마크 역할]
+    <main>은 페이지의 핵심 콘텐츠를 감싸는 시맨틱 태그입니다.
+    스크린 리더 사용자는 "메인 콘텐츠로 건너뛰기" 단축키로 바로 이동할 수 있습니다.
+    한 페이지에 <main>은 반드시 1개만 사용해야 합니다.
+
+    [CSS 역할]
+    position: relative가 적용되어 있어, 내부의 .slider-controls(이전/다음 버튼)가
+    position: absolute로 절대 위치를 잡을 때 이 요소를 기준점으로 사용합니다.
+    ⚠️ 주의: position: relative를 제거하면 버튼 위치가 <body> 기준으로 틀어집니다.
+  -->
+  <main class="slider-section">
+
+    <!--
+      [창문 역할 — .slider-container]
+      overflow: hidden이 적용된 '창문'입니다.
+      내부의 긴 필름(.slider-track)은 슬라이드 수만큼 가로로 늘어나 있지만,
+      이 창문 밖으로 삐져나오는 부분은 모두 잘려서 안 보이게 됩니다.
+      사용자는 창문 크기(= 화면 너비)만큼만 볼 수 있습니다.
+
+      ⚠️ 주의: 데스크톱(1024px+)에서는 overflow: visible로 해제됩니다.
+               .bg-pattern(배경 도형)과 그림자가 컨테이너 밖으로 크게 튀어나오는
+               디자인이기 때문입니다. 이 설정을 되돌리면 배경 도형이 잘려 보입니다.
+    -->
+    <div class="slider-container">
+
+      <!--
+        [긴 필름 역할 — .slider-track]
+        display: flex로 모든 슬라이드를 가로 한 줄에 나열한 '긴 필름'입니다.
+        JavaScript가 이 요소에 transform: translateX(-N * 100%)를 동적으로 적용하여
+        원하는 슬라이드를 창문 앞으로 끌어당깁니다.
+
+        id="slider-track" — JavaScript에서 getElementById로 직접 참조합니다.
+        ⚠️ 주의: 이 id를 변경하거나 삭제하면 script.js의 슬라이드 전환이 작동하지 않습니다.
+      -->
       <div class="slider-track" id="slider-track">
 
-        <!-- 3-1. 개별 사진(슬라이드 아이템) - Tanya Sinclair -->
+        <!--
+          [슬라이드 1 — Tanya Sinclair]
+
+          [<article> 시맨틱 의미]
+          <article>은 그 자체로 독립적인 콘텐츠 단위임을 나타냅니다.
+          각 슬라이드는 다른 곳에 그대로 옮겨도 의미가 통하는 '하나의 후기 카드'이므로
+          <div> 대신 <article>을 사용합니다.
+
+          [aria-hidden="false" — 접근성]
+          스크린 리더에게 "이 슬라이드를 읽어라"는 신호입니다.
+          JavaScript의 goToSlide()가 현재 보이는 슬라이드만 false로 유지하고,
+          나머지는 true로 바꿔 스크린 리더가 화면 밖의 내용을 읽지 않게 합니다.
+          ⚠️ 주의: JavaScript 초기화(goToSlide(0)) 전에 HTML에서 첫 번째 슬라이드만
+                   aria-hidden="false"로 설정해 두어야 초기 렌더링이 올바릅니다.
+        -->
         <article class="slide" aria-hidden="false">
+
+          <!--
+            [비주얼 영역 — .slide-visual]
+            .bg-pattern(배경 도형)과 .profile-image(인물 사진)를 함께 감싸는 래퍼입니다.
+            position: relative를 가지고 있어, 자식인 .bg-pattern이
+            position: absolute로 사진 뒤에 정확히 겹쳐질 때 이 요소를 기준으로 삼습니다.
+          -->
           <div class="slide-visual">
+
+            <!--
+              [배경 장식 이미지 — .bg-pattern]
+              인물 사진 뒤에 깔리는 보라색 곡선 도형입니다.
+              실제 콘텐츠가 아닌 순수 장식 요소이므로:
+              - alt=""   : 스크린 리더가 이 이미지를 무시합니다 (빈 alt는 의도적 선택)
+              - aria-hidden="true" : alt=""만으로 부족할 때를 대비한 이중 안전장치입니다.
+              ⚠️ 주의: 장식 이미지에 의미 있는 alt 텍스트를 넣으면 스크린 리더가
+                       불필요한 설명을 읽어 사용자 경험을 해칩니다.
+            -->
             <img class="bg-pattern" src="images/pattern-bg.svg" alt="" aria-hidden="true" />
-            <img class="profile-image" src="images/image-tanya.jpg" alt="Tanya Sinclair profile" />
+
+            <!--
+              [인물 프로필 사진 — .profile-image]
+              증언자의 얼굴 사진입니다. 콘텐츠 이미지이므로 alt에 의미 있는 설명을 작성합니다.
+              스크린 리더는 "Tanya Sinclair 프로필 사진"이라고 읽어 줍니다.
+            -->
+            <img class="profile-image" src="images/image-tanya.jpg" alt="Tanya Sinclair 프로필 사진" />
           </div>
 
+          <!--
+            [텍스트 영역 — .slide-content]
+            인용구와 이름/직함을 담는 영역입니다.
+            데스크톱에서는 position: absolute로 필름 흐름에서 분리되어
+            사진 위에 자유롭게 겹쳐 배치됩니다.
+            ⚠️ 주의: 데스크톱의 absolute 배치는 부모인 .slide가 position: relative이기 때문에
+                     동작합니다. .slide의 position을 변경하면 텍스트 위치가 틀어질 수 있습니다.
+          -->
           <div class="slide-content">
             <p class="quote">
-              “ I’ve been interested in coding for a while but never taken the jump, until now.
-              I couldn’t recommend this course enough. I’m now in the job of my dreams and so
-              excited about the future. ”
+              " I've been interested in coding for a while but never taken the jump, until now.
+              I couldn't recommend this course enough. I'm now in the job of my dreams and so
+              excited about the future. "
             </p>
             <div class="author-info">
               <span class="author-name">Tanya Sinclair</span>
@@ -46,19 +152,25 @@
           </div>
         </article>
 
-        <!-- 3-2. 개별 사진(슬라이드 아이템) - John Tarkpor -->
-        <!-- 초기에 보이지 않도록 aria-hidden을 true로 설정합니다 -->
+        <!--
+          [슬라이드 2 — John Tarkpor]
+
+          [aria-hidden="true" — 초기 숨김 처리]
+          페이지 로드 시 두 번째 슬라이드는 화면 밖에 있으므로 스크린 리더에게도 숨깁니다.
+          JavaScript가 슬라이드 전환 시 이 값을 동적으로 변경합니다.
+          ⚠️ 주의: JavaScript가 비활성화된 환경에서는 이 슬라이드에 영구적으로
+                   접근할 수 없게 됩니다. 필요하다면 <noscript> 대응을 고려하세요.
+        -->
         <article class="slide" aria-hidden="true">
           <div class="slide-visual">
             <img class="bg-pattern" src="images/pattern-bg.svg" alt="" aria-hidden="true" />
-            <img class="profile-image" src="images/image-john.jpg" alt="John Tarkpor profile" />
+            <img class="profile-image" src="images/image-john.jpg" alt="John Tarkpor 프로필 사진" />
           </div>
-
           <div class="slide-content">
             <p class="quote">
-              “ If you want to lay the best foundation possible I’d recommend taking this course.
+              " If you want to lay the best foundation possible I'd recommend taking this course.
               The depth the instructors go into is incredible. I now feel so confident about
-              starting up as a professional developer. ”
+              starting up as a professional developer. "
             </p>
             <div class="author-info">
               <span class="author-name">John Tarkpor</span>
@@ -66,24 +178,51 @@
             </div>
           </div>
         </article>
-      </div><!-- // .slider-track 끝 -->
-    </div><!-- // .slider-container 끝 -->
 
-    <!-- 4. 슬라이드 컨트롤러 (이전/다음 버튼) -->
-    <!-- 이미지/비주얼 영역에 절대위치로 띄우기 위해 track 밖, section 안에 위치시킵니다 -->
+      </div><!-- // #slider-track 끝 — JS가 translateX를 적용하는 대상 -->
+    </div><!-- // .slider-container 끝 — overflow: hidden 창문 영역 끝 -->
+
+    <!--
+      [네비게이션 컨트롤 — .slider-controls]
+      이전/다음 버튼을 담은 알약(pill) 모양 컨테이너입니다.
+      부모인 <main class="slider-section">이 position: relative이므로,
+      이 요소의 position: absolute 좌표는 <main>을 기준으로 계산됩니다.
+
+      [<button> 태그 선택 이유 — 접근성]
+      <div>나 <span>에 클릭 이벤트를 붙이는 대신 <button>을 사용하면:
+      1. 키보드 Tab 키로 자동 포커스가 이동합니다.
+      2. 스크린 리더가 "버튼"으로 인식하여 역할을 안내합니다.
+      3. Enter/Space 키로 활성화됩니다.
+      ⚠️ 주의: <button>의 aria-label을 제거하면 스크린 리더가 버튼 안의 이미지만 읽으려 시도하는데,
+               이미지에 alt=""가 있어 아무것도 읽지 못해 버튼 기능을 알 수 없게 됩니다.
+    -->
     <div class="slider-controls">
-      <!-- 접근성을 위해 aria-label을 추가하여 스크린 리더 사용자가 '이전' 임을 알게 합니다. -->
-      <button class="nav-btn prev-btn" id="prev-btn" aria-label="이전 슬라이드 템플릿으로 이동">
+      <button class="nav-btn prev-btn" id="prev-btn" aria-label="이전 슬라이드로 이동">
+        <!--
+          [화살표 아이콘 이미지 — 장식 처리]
+          버튼의 목적은 aria-label로 이미 설명되어 있으므로, 내부 이미지는 장식으로 처리합니다.
+          alt=""와 aria-hidden="true"로 스크린 리더가 이미지를 중복 읽지 않게 합니다.
+        -->
         <img src="images/icon-prev.svg" alt="" aria-hidden="true" />
       </button>
-      <!-- '다음' 기능도 마찬가지. -->
-      <button class="nav-btn next-btn" id="next-btn" aria-label="다음 슬라이드 템플릿으로 이동">
+      <button class="nav-btn next-btn" id="next-btn" aria-label="다음 슬라이드로 이동">
         <img src="images/icon-next.svg" alt="" aria-hidden="true" />
       </button>
     </div>
+
   </main>
 
-  <!-- 자바스크립트 로직 연결 -->
+  <!--
+    [스크립트 로드 위치 — </body> 직전]
+    <script>를 <body> 맨 끝에 배치하는 이유:
+    브라우저는 HTML을 위에서 아래로 순서대로 파싱합니다.
+    <head>에 <script>를 넣으면 JS 파일을 내려받는 동안 HTML 파싱이 멈춰
+    사용자가 빈 화면을 보게 됩니다.
+    </body> 직전에 배치하면 HTML 요소가 모두 생성된 뒤 JS가 실행되어
+    getElementById 등의 DOM 조작이 안전하게 작동합니다.
+    ⚠️ 주의: 이 <script>를 <head>로 옮기면 getElementById가 null을 반환해
+             슬라이더가 완전히 작동하지 않습니다.
+  -->
   <script src="script.js"></script>
 </body>
 

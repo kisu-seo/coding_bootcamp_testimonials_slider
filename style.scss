@@ -1,396 +1,499 @@
-/* 
-  1. 스타일 가이드 연동 (변수 선언) 
-  디자인 시스템의 설정값들을 SCSS 변수($)로 저장해두고 마치 '블록'처럼 필요할 때마다 꺼내 쓸 수 있게 설정합니다.
-*/
+/* ===========================================
+   디자인 토큰 (Design Tokens)
+   — style-guide.md의 수치를 SCSS 변수로 추상화한 '설계도'입니다.
+   여기서 정의된 값만 수정하면 전체 UI가 일관되게 바뀝니다.
+   ⚠️ 주의: 이 파일을 수정한 뒤에는 반드시 `npx sass style.scss style.css`로
+            다시 컴파일해야 브라우저에 반영됩니다.
+   =========================================== */
 
-// --------- 변수 선언부 ---------
-$white: #FFFFFF;
-$gray-400: #B9B9CE;
-/* 서브 텍스트(직함 등)에 쓰이는 부드러운 회색 */
-$gray-100: #EBEBEB;
-$gray-50: #F4F4FC;
+// --------- 색상 변수 ---------
+// 색상 이름에 숫자를 붙인 이유: Tailwind CSS와 동일한 네이밍 규칙으로
+// 숫자가 클수록 진한 색을 나타내는 직관적인 스케일 체계를 따릅니다.
+$white:      #FFFFFF;
+$gray-400:   #B9B9CE;   // 서브 텍스트(직함)에 쓰이는 부드러운 회색 — 너무 진하면 이름과 구분이 안 됩니다
+$gray-100:   #EBEBEB;
+$gray-50:    #F4F4FC;   // 버튼 호버 시 배경색 — 흰색보다 살짝 어두워 상호작용을 암시합니다
 $purple-500: #CF6BCB;
-$pink-500: #D3629D;
-$blue-950: #202047;
-/* 메인 텍스트와 타이틀에 쓰이는 진한 파란색 */
+$pink-500:   #D3629D;
+$blue-950:   #202047;   // 메인 본문과 이름에 쓰이는 진한 네이비 — 충분한 명암 대비로 가독성 확보
 
 $gradient-start: #9975D0;
-$gradient-end: #4A3FDB;
+$gradient-end:   #4A3FDB;
 
-// Typography (Font)
-$font-main: 'Inter', sans-serif;
-$font-light: 300;
-$font-medium: 500;
-$font-bold: 700;
+// --------- 타이포그래피 변수 ---------
+$font-main:   'Inter', sans-serif; // Google Fonts에서 불러온 폰트, 로드 실패 시 sans-serif로 폴백
+$font-light:  300;  // 인용구 본문 — 가벼운 느낌으로 긴 텍스트 가독성 향상
+$font-medium: 500;  // 직함 — 이름보다 약한 강조
+$font-bold:   700;  // 이름 — 가장 강한 강조
 
-$body-font-size: 32px; // Desktop
-$body-font-size-mobile: 18px; // Mobile
+// 폰트 크기는 디자인 시안의 'Text Preset' 명세를 그대로 변수화했습니다.
+$font-size-body:        32px;  // Text Preset 1: 본문 인용구 크기 (태블릿/데스크톱)
+$font-size-mobile:      18px;  // 모바일 전용 본문 크기 — 작은 화면에서 줄 바꿈 최소화
+$font-size-preset2:     20px;  // Text Preset 2: 이름·직함 공통 크기
+$line-height-preset2: 38px;    // Text Preset 2: 줄 간격 — 이름과 직함 사이 시각적 여유 확보
 
-// Spacing Tokens
-$spacing-100: 8px;
-$spacing-200: 16px;
-$spacing-300: 24px;
-$spacing-400: 32px;
-$spacing-600: 48px;
-$spacing-800: 64px;
+// --------- 간격(Spacing) 변수 ---------
+// style-guide.md의 스페이싱 토큰을 그대로 옮긴 것입니다.
+// 숫자 × 8px 규칙 (spacing-100 = 8px, spacing-200 = 16px, ...)을 따릅니다.
+$spacing-100:  8px;
+$spacing-200:  16px;
+$spacing-300:  24px;
+$spacing-400:  32px;
+$spacing-600:  48px;
+$spacing-800:  64px;
 $spacing-1200: 96px;
 
-// 반응형 Mixin (모바일 퍼스트: 데스크톱 화면이 시작되는 시점을 정의)
-// @include desktop { ... } 으로 감싸면 화면이 넓어질 때(1024px 이상) 추가 적용됩니다.
-@mixin desktop {
-  @media (min-width: 1024px) {
-    @content;
-  }
-}
+// --------- 재사용 Shadow ---------
+// 프로필 사진에 입체감을 주는 그림자입니다.
+// 값 분석: Y축 40px(아래), 번짐 50px(넓게), 수축 -30px(넓게 퍼진 그림자를 다시 조이기),
+//          투명도 49.5%(반투명)으로 자연스러운 음영 표현
+$shadow-profile: 0 40px 50px -30px rgba(#242471, 0.495);
 
-// 태블릿 Mixin: 768px ~ 1023px 사이 화면에서만 적용됩니다.
+// --------- 반응형 Mixin ---------
+// Mixin은 '자주 쓰는 코드 조각을 이름 붙여 재사용하는 함수'입니다.
+// @include tablet { ... } 처럼 호출하면 미디어 쿼리 안에 내용이 자동으로 감싸집니다.
+
+// 태블릿 전용: 768px 이상 ~ 1023px 이하 (양쪽 경계 모두 포함)
+// 데스크톱과 겹치지 않아 태블릿에서만 적용할 스타일을 정밀하게 제어할 수 있습니다.
 @mixin tablet {
-  @media (min-width: 768px) and (max-width: 1023px) {
-    @content;
-  }
+  @media (min-width: 768px) and (max-width: 1023px) { @content; }
 }
 
-// --------- 기본 리셋 및 뼈대 ---------
+// 태블릿 + 데스크톱 공통: 768px 이상
+// 모바일과 구별되지만 태블릿/데스크톱 사이에 같은 값이 반복될 때 DRY 원칙 준수를 위해 사용합니다.
+// (DRY = Don't Repeat Yourself — 같은 코드를 두 번 쓰지 마라는 원칙)
+@mixin tablet-up {
+  @media (min-width: 768px) { @content; }
+}
+
+// 데스크톱 전용: 1024px 이상
+// 2단 가로 레이아웃으로 전환되는 핵심 분기점입니다.
+@mixin desktop {
+  @media (min-width: 1024px) { @content; }
+}
+
+
+/* ===========================================
+   기본 리셋 & 뼈대
+   =========================================== */
+
+// [전역 리셋]
+// 브라우저마다 기본 margin/padding이 달라 레이아웃이 틀어지는 것을 방지합니다.
+// box-sizing: border-box — padding과 border가 width/height 안에 포함되도록 계산 방식을 변경합니다.
+// ⚠️ 주의: box-sizing이 border-box이면, height를 선언할 때 padding만큼 보정이 필요합니다.
+//          예) 실제 이미지 높이 403px + padding-top 72px → height: 475px으로 선언해야 합니다.
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  /* 패딩을 넣어도 박스 크기가 커지지 않게 테두리 기준으로 고정 */
 }
 
+// [<body> 레이아웃]
+// 슬라이더 카드를 화면 정중앙에 배치합니다.
+// overflow-x: hidden — 슬라이드 전환 중 가로 스크롤바가 생기는 것을 방지합니다.
+// background-image — 왼쪽 하단의 곡선 장식(pattern-curve.svg)을 고정합니다.
 body {
   font-family: $font-main;
   color: $blue-950;
   background-color: $white;
-  // 전체 화면 가운데 정렬, 높이를 화면 크기만큼 꽉 채움
-  min-height: 100vh;
+  min-height: 100vh;      // 콘텐츠가 짧아도 항상 전체 화면을 채워 배경이 끊기지 않게 합니다
   display: flex;
   flex-direction: column;
-  align-items: center;   // 가로 중앙 정렬
-  justify-content: center; // ★ 세로 중앙 정렬 (콘텐츠를 화면 높이의 정중앙으로)
-  overflow-x: hidden; // 좌우 스크롤 튀어나가는 현상 방지
-
-  // 왼쪽 아래로 뻗어가는 곡선 배경화면 (pattern-curve)
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;     // ← 없으면 슬라이드 전환 시 오른쪽에 가로 스크롤바가 나타납니다
   background-image: url('images/pattern-curve.svg');
   background-repeat: no-repeat;
-  background-position: left bottom;
-  background-size: 70% auto;
+  background-position: left bottom; // 왼쪽 하단 고정 — 디자인 시안의 장식 위치를 따릅니다
+  background-size: 70% auto;        // 모바일: 좁은 화면에서 곡선이 너무 크게 보이지 않도록 축소
 
-  @include tablet {
-    background-size: 36% auto; // 태블릿에서 하단 곡선 무늬 크기 최적화
-  }
-
-  @include desktop {
-    background-size: auto;
-  }
+  // 태블릿: 화면이 넓어지므로 배경 비율을 줄여 과도한 장식을 억제합니다
+  @include tablet  { background-size: 36% auto; }
+  // 데스크톱: 원본 디자인 시안 비율 복원
+  @include desktop { background-size: auto; }
 }
 
-// --------- 1. 전체 영역 (메인 래퍼) ---------
+
+/* ===========================================
+   슬라이더 구조 — 3단 레이어 아키텍처
+   창문(Container) → 필름(Track) → 슬라이드(Slide)
+   =========================================== */
+
+// [레이어 1] 전체 무대 — .slider-section
+// 이 요소가 position: relative인 이유:
+// 자식인 .slider-controls(이전/다음 버튼)가 position: absolute로 배치될 때
+// 이 요소를 '좌표 원점'으로 삼기 위해서입니다.
+// ⚠️ 주의: position: relative를 제거하면 버튼이 화면 전체 기준으로 위치가 잡혀 레이아웃이 깨집니다.
 .slider-section {
-  position: relative;
+  position: relative; // 하위 absolute 요소(.slider-controls)의 기준점
   width: 100%;
-  padding: 0; // 모바일 패딩 제거
-
-  @include desktop {
-    padding: 0; // 데스크톱 패딩 제거
-  }
 }
 
-// --------- 2. 슬라이더 창문(Container) ---------
+// [레이어 2] 창문 — .slider-container
+// overflow: hidden이 핵심입니다.
+// 내부 .slider-track이 슬라이드 수만큼 가로로 길게 늘어나 있어도,
+// 이 창문 밖으로 삐져나온 부분은 잘려서 안 보입니다.
+// ⚠️ 주의: 데스크톱에서 overflow: visible로 해제합니다.
+//          이유: .bg-pattern 배경 도형과 인물 사진 그림자가 컨테이너 경계를
+//               넘어 크게 펼쳐지는 디자인이기 때문입니다.
+//          overflow: hidden을 유지하면 배경 도형이 잘려 디자인이 깨집니다.
 .slider-container {
-  overflow: hidden; // 기본형 (모바일 등에서는 창문 밖으로 나가는 것을 숨김)
+  overflow: hidden;   // ← 없으면 슬라이드가 한 줄에 모두 보여 슬라이더가 아닌 목록처럼 보입니다
   width: 100%;
   position: relative;
-  padding: 0; // 패딩 제거
 
-  @include desktop {
-    // 데스크톱에서는 이미지 뒷배경 무늬(.bg-pattern)나 그림자가 
-    // 창문(Container) 바깥으로 크게 튀어나가기 때문에 잘려 보이지 않도록 'visible'로 풀어줍니다.
-    overflow: visible; 
-  }
+  // 데스크톱: 배경 장식이 컨테이너 밖으로 튀어나오는 디자인이므로 클리핑 해제
+  @include desktop { overflow: visible; }
 }
 
-// --------- 3. 긴 필름(Track) ---------
-// 모든 슬라이드를 가로로 쭉 나열한 거대한 필름입니다.
+// [레이어 3] 긴 필름 — .slider-track
+// display: flex로 슬라이드들을 가로 한 줄에 나열합니다.
+// JavaScript가 transform: translateX(-N * 100%)를 동적으로 적용하여
+// 원하는 슬라이드가 창문 앞에 오도록 필름을 당깁니다.
+// transition — CSS가 transform 변화를 0.6초 동안 부드럽게 보간합니다.
+// cubic-bezier(0.25, 1, 0.5, 1) — 처음엔 빠르게, 끝에서 살짝 감속하는 자연스러운 이징 커브입니다.
+// ⚠️ 주의: transition을 제거하면 슬라이드가 '순간이동'처럼 딱딱하게 전환됩니다.
 .slider-track {
-  display: flex; // 가로 배치
+  display: flex;      // ← 없으면 슬라이드가 세로로 쌓여 슬라이더가 작동하지 않습니다
   width: 100%;
   align-items: center;
-  // 탭이나 화살표 버튼으로 넘어갈 때, 화면이 부드럽게 옆으로 밀리는 시각적 피드백 제공
   transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-// --------- 4. 개별 슬라이드(Slide) ---------
+// [레이어 4] 개별 슬라이드 카드 — .slide
+// flex: 0 0 100% — 창문(.slider-container)의 100% 너비에 딱 맞게 크기를 고정합니다.
+// 분해: flex-grow:0 (늘어나지 않음), flex-shrink:0 (줄어들지 않음), flex-basis:100% (기본 너비)
+// ⚠️ 주의: flex-shrink:0이 없으면 슬라이드들이 창문 너비에 맞게 서로 줄어들어
+//          창문 안에 모든 슬라이드가 한꺼번에 보이게 됩니다.
 .slide {
-  flex: 0 0 100%; // 너비를 부모 컨테이너(100%)와 동일하게 맞춤
+  flex: 0 0 100%;     // ← 창문 크기에 딱 맞는 '1장'을 보장하는 핵심 선언
   display: flex;
-  flex-direction: column; // 위쪽: 사진, 아래쪽: 텍스트 (모바일)
+  flex-direction: column; // 모바일: 사진(위) → 텍스트(아래) 세로 배치
   align-items: center;
-  position: relative;
+  position: relative; // .slide-content의 absolute 배치 기준점 (데스크톱에서 사용)
 
+  // 데스크톱: 세로 배치 → 가로 2단 배치로 전환
+  // justify-content: flex-end — .slide-visual(사진)을 오른쪽 끝으로 밀어붙입니다.
+  // 이렇게 하면 텍스트 영역(absolute 배치)이 사진 왼쪽 공간에 자연스럽게 위치합니다.
   @include desktop {
-    flex-direction: row; 
-    justify-content: flex-end; // 남은 공간을 밀어내어 사진(.slide-visual)이 우측 끝에 붙게 만듭니다.
-    padding-left: 0; // 텍스트를 절대 위치로 고정할 것이므로 불필요한 패딩 제거
-    align-items: center; 
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
   }
 }
 
-// --------- 5. 비주얼 영역 (사진 + 무늬 배경) ---------
+
+/* ===========================================
+   비주얼 영역 (.slide-visual)
+   — .bg-pattern(배경 도형)과 .profile-image(인물 사진)의 위치 기준점
+   =========================================== */
+
+// [.slide-visual]
+// position: relative — 자식인 .bg-pattern이 absolute 배치 시 이 요소를 기준으로 합니다.
+// max-width + margin: 0 auto — 가운데 정렬을 위한 패턴입니다.
+// ⚠️ 핵심 주의: margin: 0 auto가 가운데 정렬로 작동하려면
+//               부모(.slide-visual)의 max-width가 자식(.profile-image)보다 크거나 같아야 합니다.
+//               부모가 더 좁으면 auto 마진이 계산할 여유 공간이 없어 왼쪽으로 붙어 버립니다.
+//               (태블릿에서 max-width: 405px로 맞춰준 이유가 바로 이것입니다)
 .slide-visual {
-  position: relative;
+  position: relative;   // ← 없으면 .bg-pattern이 페이지 전체 기준으로 위치가 잡혀 버립니다
   width: 100%;
-  max-width: 254px; // 모바일용 프로필 이미지 크기
-  margin: 0 auto 82px; // 사진 아래 여백 + 좌우 auto로 가운데 정렬
-  flex-shrink: 0;
+  max-width: 254px;     // 모바일 기준 최대 너비 — .profile-image가 이 너비 안에서 100% 채웁니다
+  margin: 0 auto 82px;  // 좌우 auto: 가운데 정렬 / 아래 82px: 텍스트 영역과의 간격
+  flex-shrink: 0;       // 부모 flex 컨테이너에서 사진 영역이 줄어드는 것을 방지합니다
 
+  // 태블릿: 사진 너비(405px)에 맞춰 부모 박스도 확장 → margin: 0 auto 가운데 정렬이 작동하게 됩니다
+  // ⚠️ 주의: max-width를 405px로 올리지 않으면 사진이 왼쪽으로 쏠려 보입니다
   @include tablet {
-    max-width: 405px; // 태블릿: .profile-image(405px)를 감쌀 수 있도록 부모 크기도 함께 확장
-    margin-bottom: 180px; // 태블릿 하단 여백 (138px에서 180px로 상향 조정)
-    // margin: 0 auto 82px 은 모바일 값을 그대로 상속 → 부모가 넓어졌으니 이제 제대로 가운데 정렬됨
+    max-width: 405px;
+    margin-bottom: 180px; // 텍스트 영역(.slide-content)이 사진 아래에 넉넉하게 위치할 공간
   }
 
+  // 데스크톱: 가로 2단 배치로 전환, 오른쪽 여백으로 텍스트(absolute 배치) 공간 확보
   @include desktop {
-    max-width: 540px; // 데스크톱 프로필 크기
-    margin: 0;
-    margin-right: 165px; // 데스크톱 오른쪽 여백 (이제 방해받지 않고 정확히 165px 적용됨)
-    display: flex;       // 내부 요소(이미지) 정렬을 위한 설정
-    align-items: center; // 세로 중앙 정렬
+    max-width: 540px;
+    margin: 0 165px 0 0;  // 오른쪽 165px 여백 = absolute 배치된 .slide-content의 left: 165px와 호응
+    display: flex;
+    align-items: center;
   }
 
-  // 뒤에 깔리는 보라색 곡선 무늬창
+  // [5-1. 배경 도형 — .bg-pattern]
+  // position: absolute + top/left + transform: translate(-50%, -50%) — '정중앙 겹치기' 패턴입니다.
+  // top: 50%, left: 50%로 도형의 왼쪽 상단 꼭짓점을 부모 중앙에 놓고,
+  // translate(-50%, -50%)로 도형 자체 크기의 절반만큼 다시 당겨서 정확히 가운데 정렬합니다.
+  // z-index: -1 — 사진(.profile-image)보다 뒤에 배치해 배경 역할을 합니다.
+  // ⚠️ 주의: z-index는 position이 설정된 요소에서만 작동합니다.
+  //          이 요소가 position: absolute이므로 z-index가 정상 작동합니다.
   .bg-pattern {
-    position: absolute;
+    position: absolute; // ← 없으면 사진 아래에 세로로 쌓여 사진과 겹치지 않습니다
     top: 53.5%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    width: 326px; // 배경 무늬 너비
-    height: 327px; // 배경 무늬 높이
-    padding-top: 24px; // 상단 여백
-    z-index: -1; // 사진 뒤로 가도록 설정
+    transform: translate(-50%, -50%); // 부모 기준 정중앙 정렬 트릭
+    width: 326px;
+    height: 327px;
+    padding-top: 24px;  // 모바일에서 도형을 시각적으로 살짝 위로 올리기 위한 조정
+    z-index: -1;        // ← 없으면 배경 도형이 사진 위를 덮어버립니다
 
+    // 태블릿: 사진이 커지므로 배경 도형도 함께 확대합니다
     @include tablet {
-      width: 520px; // 태블릿 배경 무늬 너비
-      height: 490px; // 태블릿 배경 무늬 높이
-      top: 57%; // 태블릿 배경 무늬 세로 위치
-      padding-top: 0; // 태블릿 배경 무늬 상단 패딩 제거
+      width: 520px;
+      height: 490px;
+      top: 57%;         // 도형 세로 위치 재조정 (디자인 시안 기준)
+      padding-top: 0;   // 태블릿에서는 padding으로 위치를 조정하지 않습니다
     }
 
+    // 데스크톱: 2단 레이아웃에 맞게 도형을 더 크게 확대합니다
     @include desktop {
-      width: 697px;  // 데스크톱 배경 무늬 너비
-      height: 657px; // 데스크톱 배경 무늬 높이
-      padding: 0;    // 데스크톱 패딩 제거
-      top: 49%;      // 데스크톱 배경 무늬 세로 위치조정
+      width: 697px;
+      height: 657px;
+      top: 49%;
+      padding: 0;
     }
   }
 
-  // 인물 사진
+  // [5-2. 인물 사진 — .profile-image]
+  // ⚠️ 핵심 주의: box-sizing: border-box(전역 설정) 때문에
+  //               height를 선언할 때 padding-top만큼 더해야 합니다.
+  //               실제 이미지 영역 = height - padding-top
+  //               태블릿: height(475px) - padding-top(72px) = 403px (실제 표시 영역)
   .profile-image {
-    width: 100%; // 부모 max-width에 비례
-    padding-top: 54px; // 상단 여백
+    width: 100%;
+    padding-top: 54px;          // 모바일: 배경 도형이 사진 위로 살짝 올라오는 공간 확보
     border-radius: 5px;
-    box-shadow: 0 40px 50px -30px rgba(#242471, 0.495); // 그림자: Y 40px, 번짐 50px, 축소 -30px, 색상 #242471 불투명도 49.5%
+    box-shadow: $shadow-profile; // 변수로 분리된 그림자 — 값을 바꾸려면 상단 변수만 수정하세요
 
+    // 태블릿: 고정 크기로 지정하여 이미지 비율을 유지합니다
+    // height: 475px = 실제 이미지 표시 영역 403px + padding-top 72px (border-box 보정)
     @include tablet {
-      width: 405px; // 태블릿 인물 사진 너비
-      height: 475px; // 실제 이미지 높이 403px + padding-top 72px = 475px (border-box 보정)
-      display: block; // 블록 요소로 변환 (margin auto 가 작동하려면 블록이어야 합니다)
-      margin: 0 auto; // 좌우 여백을 자동으로 균등 분배 → 가로 중앙 정렬
-      padding-top: 72px; // 태블릿 인물 사진 상단 여백
+      width: 405px;
+      height: 475px;    // ← border-box 때문에 padding까지 포함한 값입니다. 섣불리 줄이지 마세요
+      display: block;   // ← margin: 0 auto가 작동하려면 block이어야 합니다 (img 기본값은 inline)
+      margin: 0 auto;   // 부모(405px) 안에서 가운데 정렬
+      padding-top: 72px;
     }
 
+    // 데스크톱: 2단 레이아웃에서 사진이 자연스럽게 영역을 채우도록 padding을 제거합니다
+    // box-sizing: content-box로 전환 — width/height 계산에서 padding을 분리합니다
     @include desktop {
-      padding-top: 0; // 데스크톱에서 상단 패딩 제거
-      box-sizing: content-box; // 패딩을 추가해도 이미지(콘텐츠)가 찌그러지지 않고 밖으로 밀어내도록 설정
+      padding-top: 0;
+      box-sizing: content-box;
     }
   }
 }
 
-// --------- 6. 텍스트 영역 (인용구 + 정보) ---------
+
+/* ===========================================
+   텍스트 영역 (.slide-content)
+   — 인용구, 이름, 직함을 담는 영역
+   =========================================== */
+
+// [.slide-content]
+// z-index: 2 — .bg-pattern(z-index: -1) 위에 텍스트가 보이도록 쌓임 순서를 명시합니다.
+// ⚠️ 주의: 데스크톱에서 position: absolute로 전환됩니다.
+//          absolute 요소는 문서 흐름에서 벗어나므로 부모(.slide)의 높이에 영향을 주지 않습니다.
+//          이를 의도적으로 활용해 텍스트를 사진 위에 자유롭게 겹쳐 배치합니다.
 .slide-content {
   text-align: center;
-  position: relative;
-  z-index: 2; // 배경보다 위로 뜨게 설정
-  padding: 0 $spacing-400; // 좌우 여백 32px
+  position: relative; // z-index가 작동하기 위한 최소 position 설정
+  z-index: 2;         // ← 없으면 텍스트가 .bg-pattern 아래로 숨어버릴 수 있습니다
+  padding: 0 $spacing-400; // 모바일: 좌우 여백으로 텍스트가 화면 끝에 붙지 않게 합니다
 
+  // 데스크톱: 2단 레이아웃에서 텍스트를 사진 왼쪽에 겹쳐 배치하는 핵심 스타일
+  // position: absolute + top: 50% + translateY(-50%) — 세로 정중앙 정렬 패턴입니다.
+  // left: 165px — 부모(.slide)의 왼쪽 끝에서 165px 떨어진 위치에 고정합니다.
+  // ⚠️ 주의: left 값을 변경하면 .slide-visual의 margin-right 값도 함께 조정해야
+  //          텍스트와 사진이 겹쳐 보이거나 너무 멀어지지 않습니다.
   @include desktop {
-    text-align: left;   // 데스크톱에서는 좌측 정렬
-    padding: 0;         // 패딩 제거
-    max-width: 635px;   // 최대 너비 제한
-    position: absolute; // 부양시켜 플렉스 레이아웃의 자리다툼에서 벗어나게 함
-    left: 165px;        // 닻(Anchor)을 화면 왼쪽에서 165px 지점에 단단히 고정
-    top: 50%;           // 부모(slide) 기준 세로 절반
-    transform: translateY(-50%); // 세로 중앙으로 완벽히 정렬
-    z-index: 10;        // [핵심] 사진 위로 텍스트 문단 전체가 겹치도록 z-축 우선순위 부여
+    text-align: left;
+    padding: 0;
+    max-width: 635px;
+    position: absolute; // 문서 흐름에서 분리 → 사진(.slide-visual) 위에 자유롭게 겹침
+    left: 165px;
+    top: 50%;
+    transform: translateY(-50%); // top:50% 단독으로는 요소 상단이 중앙에 오므로, 요소 자신의 절반만큼 위로 당깁니다
+    z-index: 10;        // .bg-pattern, .profile-image 모두 위에 표시
   }
 
-  // 큰 따옴표 (배경 요소)
+  // [6-1. 장식용 따옴표 — ::before 가상 요소]
+  // CSS만으로 HTML 마크업 없이 장식 이미지를 삽입하는 패턴입니다.
+  // content: '' — 빈 문자열이 필수입니다. 없으면 가상 요소 자체가 생성되지 않습니다.
+  // ⚠️ 주의: z-index: -1로 설정했으므로 텍스트 아래에 깔립니다.
+  //          z-index를 올리면 텍스트 위를 가려 인용구가 읽히지 않습니다.
   &::before {
-    content: '';
+    content: '';        // ← 빈 문자열이라도 반드시 있어야 가상 요소가 렌더링됩니다
     position: absolute;
-    top: -25px;
+    top: -25px;         // 모바일: 따옴표가 인용구 텍스트 살짝 위에 위치
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%); // 가로 정중앙 정렬
     width: 60px;
     height: 50px;
     background-image: url('images/pattern-quotes.svg');
     background-repeat: no-repeat;
     background-size: contain;
-    z-index: -1;
+    z-index: -1;        // ← 텍스트(.quote) 아래 배경 장식으로 배치
 
-    @include tablet {
-      width: 120px;
-      height: 100px;
-      top: -75px; // 요청하신 대로 -45px에서 -75px로 위치 조정했습니다.
-    }
-
-    @include desktop {
-      top: -73px; // 데스크톱 따옴표 높이 조정 (기존 -60px에서 -73px로)
-      left: 25%; // 데스크톱 따옴표 가로 위치 조정 (기존 15%에서 25%로)
+    // 태블릿 + 데스크톱 공통: 화면이 넓어지면 따옴표 크기도 2배로 확대
+    @include tablet-up {
       width: 120px;
       height: 100px;
     }
+
+    // 태블릿: 사진이 커지면서 텍스트 영역이 아래로 이동 → 따옴표 세로 위치 재조정
+    @include tablet  { top: -75px; }
+    // 데스크톱: 가로 배치로 전환되면서 따옴표 위치를 텍스트 블록 기준으로 재조정
+    @include desktop { top: -73px; left: 25%; }
   }
 
-  // 본문 문구 (인용구)
+  // [6-2. 인용구 본문 — .quote]
+  // font-weight: light(300) — 디자인 시안에서 인용구는 가볍게 표현해 이름/직함과 대비를 줍니다.
   .quote {
-    font-size: $body-font-size-mobile; // 18px
-    line-height: 1.35; // 135%
-    font-weight: $font-light; // 300
-    margin-bottom: $spacing-200; // 16px
+    font-size: $font-size-mobile; // 모바일: 18px
+    line-height: 1.35;
+    font-weight: $font-light;
+    margin-bottom: $spacing-200; // 인용구와 이름 사이 여백
 
+    // 태블릿: 큰 화면에 맞게 폰트 크기와 줄 간격을 늘립니다
     @include tablet {
-      font-size: $body-font-size; // text preset 1: 32px
-      line-height: 1.375; // text preset 1: 137.5%
-      font-weight: $font-light; // text preset 1: light (300)
-      margin-bottom: $spacing-400; // 태블릿 인용구 하단 여백: 32px
-      max-width: 635px; // 요청하신 최소 너비 적용 (시각적 균형)
-      margin-left: auto; // 가운데 정렬을 위한 설정
+      font-size: $font-size-body;   // 32px — Text Preset 1
+      line-height: 1.375;
+      margin-bottom: $spacing-400; // 32px — 더 큰 화면에서 여백도 증가
+      max-width: 635px;
+      margin-left: auto;            // 텍스트 블록 가운데 정렬
       margin-right: auto;
     }
 
+    // 데스크톱: 태블릿과 폰트 크기는 같지만 텍스트 블록 너비를 고정합니다
     @include desktop {
-      width: 635px;       // 요청하신 데스크톱 너비 고정 적용
-      margin-left: 0;     // 태블릿의 auto를 해제하고 부모 영역의 맨 왼쪽에 완전히 밀착시킴
-      font-size: $body-font-size;
-      margin-bottom: 32px; // 요청하신 대로 데스크톱 인용구 하단 여백을 32px로 조정
+      font-size: $font-size-body;   // 32px
       line-height: 1.4;
+      width: 635px;
+      margin-left: 0;               // 가로 2단에서는 좌측 정렬
+      margin-bottom: $spacing-400;  // 32px
     }
   }
 
-  // 직함, 이름 영역
+  // [6-3. 이름·직함 영역 — .author-info]
+  // 모바일: 세로로 쌓임 (이름 위, 직함 아래)
+  // 태블릿 이상: 가로 한 줄 정렬로 전환
   .author-info {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-direction: column; // 모바일: 이름/직함 세로 배치
+    gap: 4px;               // 세로 배치 시 이름과 직함 사이 최소 간격
 
-    @include tablet {
-      flex-direction: row; // 태블릿: 이름과 직함을 가로 일렬로
-      align-items: center; // 세로 가운데 정렬
-      justify-content: center; // 가로 가운데 정렬
-      gap: $spacing-100; // 이름과 직함 사이 간격 8px
-    }
-
-    @include desktop {
-      flex-direction: row; // 이름과 직함을 한 줄로
+    // 태블릿 + 데스크톱 공통: 가로 한 줄 배치로 전환
+    // gap: $spacing-100(8px) — 이름과 직함 사이 구분감을 주는 최소 간격
+    @include tablet-up {
+      flex-direction: row;
       align-items: center;
-      gap: $spacing-100; // 요청하신 대로 간격 8px로 조정
+      gap: $spacing-100;  // 8px
     }
 
+    // 태블릿 전용: 가로 배치이지만 화면 중앙 정렬 유지
+    @include tablet { justify-content: center; }
+    // 데스크톱: 별도 추가 없음 — 텍스트 블록이 left: 165px에 고정되므로 자연스럽게 좌측 정렬됩니다
+
+    // 이름
     .author-name {
-      font-weight: $font-bold;
+      font-weight: $font-bold; // 가장 강조되는 요소 — 증언자 이름
 
-      @include tablet {
-        font-size: 20px; // Text preset 2
-        line-height: 38px;
-        font-weight: $font-bold; // text preset 2 bold
-      }
-
-      @include desktop {
-        font-size: 20px; // 데스크톱 Text preset 2
-        line-height: 38px;
-        font-weight: $font-bold; // Bold (700)
+      // 태블릿 + 데스크톱 공통: 모바일보다 큰 폰트로 존재감 확보
+      @include tablet-up {
+        font-size: $font-size-preset2;    // 20px
+        line-height: $line-height-preset2; // 38px
       }
     }
 
+    // 직함
     .author-title {
-      font-weight: $font-medium;
-      color: $gray-400; // 회색 처리로 우선순위를 낮춤 (시각적 일관성)
+      font-weight: $font-medium; // 이름보다 약한 강조
+      color: $gray-400;          // 회색으로 시각적 위계 구분 — 이름과 직함이 같은 색이면 구분이 안 됩니다
 
-      @include tablet {
-        font-size: 20px; // Text preset 2 (폰트 크기)
-        line-height: 38px; // Text preset 2 (줄 간격)
-        font-weight: $font-medium; // Medium (500)
-      }
-
-      @include desktop {
-        font-size: 20px; // 데스크톱 Text preset 2 (폰트 크기)
-        line-height: 38px; // 데스크톱 Text preset 2 (줄 간격)
-        font-weight: $font-medium; // Medium (500)
+      // 태블릿 + 데스크톱 공통: 이름과 동일한 크기로 나란히 읽힙니다
+      @include tablet-up {
+        font-size: $font-size-preset2;    // 20px
+        line-height: $line-height-preset2; // 38px
       }
     }
   }
 }
 
-// --------- 7. 네비게이션(이전/다음) 컨트롤러 ---------
+
+/* ===========================================
+   네비게이션 컨트롤 (.slider-controls)
+   — 이전/다음 버튼을 담는 알약(pill) 모양 컨테이너
+   =========================================== */
+
+// [.slider-controls]
+// position: absolute — 부모(.slider-section)를 기준으로 슬라이드 카드 위에 겹쳐 배치합니다.
+// overflow: hidden — 버튼 모서리가 pill 영역 밖으로 삐져나가지 않게 잘라냅니다.
+// ⚠️ 주의: 데스크톱에서 top: auto; bottom: -56px — 이미지 하단 바깥쪽에 고정됩니다.
+//          bottom 값을 변경하면 버튼이 이미지와 겹치거나 너무 멀어질 수 있습니다.
 .slider-controls {
-  position: absolute;
-  top: 51%; // 모바일: 이미지 하단 쪽에 배치
+  position: absolute; // 슬라이드 카드 위에 겹쳐 배치 (부모 .slider-section 기준)
+  top: 51%;           // 모바일: 사진과 텍스트 경계 부근에 위치
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%); // 버튼 박스 자체를 가운데 정렬
   display: flex;
-  width: 80px; // 컨트롤러 너비
-  height: 40px; // 컨트롤러 높이
+  width: 80px;        // 모바일 기본 크기
+  height: 40px;
   background: $white;
-  border-radius: 30px; // 모서리 둥글게, 알약 모양
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); // 살짝 뜨게 만듦
-  overflow: hidden; // 버튼 둥근 모서리가 삐져나가지 않게
-  z-index: 10;
+  border-radius: 30px; // 양 끝이 둥근 알약(pill) 모양
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); // 카드 위에 떠 있는 느낌
+  overflow: hidden;   // ← 없으면 버튼의 :hover 배경이 pill 모서리를 벗어납니다
+  z-index: 10;        // 슬라이드 콘텐츠 위에 항상 보이도록
 
-  @include tablet {
-    width: 112px; // 태블릿 컨트롤러 너비
-    height: 56px; // 태블릿 컨트롤러 높이
-    top: 50%; // 태블릿 컨트롤러 세로 위치 (기존 52.5%에서 50%로 수정)
+  // 태블릿 + 데스크톱 공통: 터치 영역을 충분히 확보하기 위해 크기를 키웁니다
+  // 모바일 접근성 가이드라인(WCAG): 터치 타깃 최소 44×44px 권장
+  @include tablet-up {
+    width: 112px;
+    height: 56px;
   }
 
-  @include desktop {
-    // 데스크톱: 이미지 왼쪽 아래 모서리 쪽에 걸치도록 배치
-    width: 112px; // 데스크톱 컨트롤러 너비 추가
-    height: 56px; // 데스크톱 컨트롤러 높이 추가
-    top: auto;
-    bottom: -56px; // 데스크톱 하단 위치 재조정 (60px에서 -56px로 수정)
-    left: 59%;     // 데스크톱 왼쪽 위치 재조정 (60%에서 59%로 수정)
-  }
+  // 태블릿: 세로 중앙 위치로 재조정 (사진 높이 변화에 따른 보정)
+  @include tablet  { top: 50%; }
+  // 데스크톱: 사진 영역 하단 바깥쪽에 고정 — 2단 레이아웃의 사진 아래에 위치
+  // left: 59% — 2단 구조에서 사진 중앙 하단에 오도록 조정
+  // ⚠️ 주의: left, bottom 값은 .slide-visual의 크기 및 위치와 맞물려 있습니다.
+  @include desktop { top: auto; bottom: -56px; left: 59%; }
 
+  // [이전·다음 버튼 — .nav-btn]
+  // <button> 기본 스타일(border, background)을 제거하고 pill 안에서 균등하게 나눕니다.
   .nav-btn {
     border: none;
     background: transparent;
-    flex: 1; // 컨트롤러 너비를 두 버튼이 균등하게 나눔 (각 40px)
+    flex: 1;            // pill 너비를 두 버튼이 정확히 50:50으로 나눕니다
     display: flex;
-    align-items: center; // 세로 가운데 정렬
-    justify-content: center; // 가로 가운데 정렬
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    // 마우스를 올렸을 때 서서히 배경색이 변하는 효과 (사용자 상호작용 피드백)
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease; // 호버/포커스 시 배경색 변화를 부드럽게 처리
 
+    // 마우스 호버 및 키보드 포커스 시 시각적 피드백
+    // :focus — 키보드 Tab으로 버튼에 접근했을 때도 동일한 피드백을 제공합니다 (접근성 필수)
     &:hover,
-    &:focus {
-      background-color: $gray-50;
-    }
+    &:focus { background-color: $gray-50; }
 
     img {
-      width: 6px;  // 기본 화살표 너비
-      height: 11px; // 기본 화살표 높이
+      width: 6px;
+      height: 11px;     // 모바일: 작은 화살표 아이콘
 
+      // 데스크톱: 버튼 크기가 커지므로 아이콘도 비례해서 키웁니다
       @include desktop {
-        width: 8px;  // 데스크톱 화살표 너비 키움 (8px)
-        height: 16px; // 데스크톱 화살표 높이 키움 (16px)
+        width: 8px;
+        height: 16px;
       }
     }
   }
 }
 
-// 하단 크레딧
+
+/* ===========================================
+   하단 크레딧 (.attribution)
+   — Frontend Mentor 챌린지 출처 표기
+   =========================================== */
+
+// 실제 디자인 시안에는 없는 요소이지만 Frontend Mentor 제출 요건상 포함합니다.
+// 마진 상단($spacing-600)으로 슬라이더 카드와 충분한 간격을 유지합니다.
 .attribution {
   font-size: 11px;
   text-align: center;
@@ -403,8 +506,6 @@ body {
     font-weight: $font-bold;
     text-decoration: none;
 
-    &:hover {
-      text-decoration: underline;
-    }
+    &:hover { text-decoration: underline; }
   }
 }
