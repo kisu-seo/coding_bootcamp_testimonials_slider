@@ -8,22 +8,29 @@
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; /* 패딩을 넣어도 박스 크기가 커지지 않게 테두리 기준으로 고정 */
+  box-sizing: border-box;
+  /* 패딩을 넣어도 박스 크기가 커지지 않게 테두리 기준으로 고정 */
 }
 
 body {
   font-family: "Inter", sans-serif;
   color: #202047;
-  background-color: #ffffff;
+  background-color: #FFFFFF;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   overflow-x: hidden;
   background-image: url("images/pattern-curve.svg");
   background-repeat: no-repeat;
   background-position: left bottom;
   background-size: 70% auto;
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  body {
+    background-size: 36% auto;
+  }
 }
 @media (min-width: 1024px) {
   body {
@@ -48,6 +55,11 @@ body {
   position: relative;
   padding: 0;
 }
+@media (min-width: 1024px) {
+  .slider-container {
+    overflow: visible;
+  }
+}
 
 .slider-track {
   display: flex;
@@ -65,8 +77,10 @@ body {
 }
 @media (min-width: 1024px) {
   .slide {
-    flex-direction: row-reverse;
+    flex-direction: row;
     justify-content: flex-end;
+    padding-left: 0;
+    align-items: center;
   }
 }
 
@@ -77,10 +91,19 @@ body {
   margin: 0 auto 82px;
   flex-shrink: 0;
 }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .slide-visual {
+    max-width: 405px;
+    margin-bottom: 180px;
+  }
+}
 @media (min-width: 1024px) {
   .slide-visual {
     max-width: 540px;
     margin: 0;
+    margin-right: 165px;
+    display: flex;
+    align-items: center;
   }
 }
 .slide-visual .bg-pattern {
@@ -93,9 +116,20 @@ body {
   padding-top: 24px;
   z-index: -1;
 }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .slide-visual .bg-pattern {
+    width: 520px;
+    height: 490px;
+    top: 57%;
+    padding-top: 0;
+  }
+}
 @media (min-width: 1024px) {
   .slide-visual .bg-pattern {
-    width: 130%;
+    width: 697px;
+    height: 657px;
+    padding: 0;
+    top: 49%;
   }
 }
 .slide-visual .profile-image {
@@ -103,6 +137,21 @@ body {
   padding-top: 54px;
   border-radius: 5px;
   box-shadow: 0 40px 50px -30px rgba(36, 36, 113, 0.495);
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .slide-visual .profile-image {
+    width: 405px;
+    height: 475px;
+    display: block;
+    margin: 0 auto;
+    padding-top: 72px;
+  }
+}
+@media (min-width: 1024px) {
+  .slide-visual .profile-image {
+    padding-top: 0;
+    box-sizing: content-box;
+  }
 }
 
 .slide-content {
@@ -114,8 +163,13 @@ body {
 @media (min-width: 1024px) {
   .slide-content {
     text-align: left;
-    padding-right: 48px;
-    transform: translateX(10%);
+    padding: 0;
+    max-width: 635px;
+    position: absolute;
+    left: 165px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
   }
 }
 .slide-content::before {
@@ -131,10 +185,17 @@ body {
   background-size: contain;
   z-index: -1;
 }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .slide-content::before {
+    width: 120px;
+    height: 100px;
+    top: -75px;
+  }
+}
 @media (min-width: 1024px) {
   .slide-content::before {
-    top: -60px;
-    left: 15%;
+    top: -73px;
+    left: 25%;
     width: 120px;
     height: 100px;
   }
@@ -145,10 +206,23 @@ body {
   font-weight: 300;
   margin-bottom: 16px;
 }
-@media (min-width: 1024px) {
+@media (min-width: 768px) and (max-width: 1023px) {
   .slide-content .quote {
     font-size: 32px;
-    margin-bottom: 48px;
+    line-height: 1.375;
+    font-weight: 300;
+    margin-bottom: 32px;
+    max-width: 635px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+@media (min-width: 1024px) {
+  .slide-content .quote {
+    width: 635px;
+    margin-left: 0;
+    font-size: 32px;
+    margin-bottom: 32px;
     line-height: 1.4;
   }
 }
@@ -157,19 +231,55 @@ body {
   flex-direction: column;
   gap: 4px;
 }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .slide-content .author-info {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+}
 @media (min-width: 1024px) {
   .slide-content .author-info {
     flex-direction: row;
     align-items: center;
-    gap: 16px;
+    gap: 8px;
   }
 }
 .slide-content .author-info .author-name {
   font-weight: 700;
 }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .slide-content .author-info .author-name {
+    font-size: 20px;
+    line-height: 38px;
+    font-weight: 700;
+  }
+}
+@media (min-width: 1024px) {
+  .slide-content .author-info .author-name {
+    font-size: 20px;
+    line-height: 38px;
+    font-weight: 700;
+  }
+}
 .slide-content .author-info .author-title {
   font-weight: 500;
-  color: #b9b9ce;
+  color: #B9B9CE;
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .slide-content .author-info .author-title {
+    font-size: 20px;
+    line-height: 38px;
+    font-weight: 500;
+  }
+}
+@media (min-width: 1024px) {
+  .slide-content .author-info .author-title {
+    font-size: 20px;
+    line-height: 38px;
+    font-weight: 500;
+  }
 }
 
 .slider-controls {
@@ -180,17 +290,26 @@ body {
   display: flex;
   width: 80px;
   height: 40px;
-  background: #ffffff;
+  background: #FFFFFF;
   border-radius: 30px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   z-index: 10;
 }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .slider-controls {
+    width: 112px;
+    height: 56px;
+    top: 50%;
+  }
+}
 @media (min-width: 1024px) {
   .slider-controls {
+    width: 112px;
+    height: 56px;
     top: auto;
-    bottom: 60px;
-    left: 60%;
+    bottom: -56px;
+    left: 59%;
   }
 }
 .slider-controls .nav-btn {
@@ -203,13 +322,18 @@ body {
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
-.slider-controls .nav-btn:hover,
-.slider-controls .nav-btn:focus {
-  background-color: #f4f4fc;
+.slider-controls .nav-btn:hover, .slider-controls .nav-btn:focus {
+  background-color: #F4F4FC;
 }
 .slider-controls .nav-btn img {
   width: 6px;
   height: 11px;
+}
+@media (min-width: 1024px) {
+  .slider-controls .nav-btn img {
+    width: 8px;
+    height: 16px;
+  }
 }
 
 .attribution {
@@ -217,7 +341,7 @@ body {
   text-align: center;
   padding: 16px;
   margin-top: 48px;
-  color: #b9b9ce;
+  color: #B9B9CE;
 }
 .attribution a {
   color: #202047;

@@ -5,12 +5,14 @@
 
 // --------- 변수 선언부 ---------
 $white: #FFFFFF;
-$gray-400: #B9B9CE; /* 서브 텍스트(직함 등)에 쓰이는 부드러운 회색 */
+$gray-400: #B9B9CE;
+/* 서브 텍스트(직함 등)에 쓰이는 부드러운 회색 */
 $gray-100: #EBEBEB;
-$gray-50:  #F4F4FC;
+$gray-50: #F4F4FC;
 $purple-500: #CF6BCB;
 $pink-500: #D3629D;
-$blue-950: #202047; /* 메인 텍스트와 타이틀에 쓰이는 진한 파란색 */
+$blue-950: #202047;
+/* 메인 텍스트와 타이틀에 쓰이는 진한 파란색 */
 
 $gradient-start: #9975D0;
 $gradient-end: #4A3FDB;
@@ -41,11 +43,19 @@ $spacing-1200: 96px;
   }
 }
 
+// 태블릿 Mixin: 768px ~ 1023px 사이 화면에서만 적용됩니다.
+@mixin tablet {
+  @media (min-width: 768px) and (max-width: 1023px) {
+    @content;
+  }
+}
+
 // --------- 기본 리셋 및 뼈대 ---------
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; /* 패딩을 넣어도 박스 크기가 커지지 않게 테두리 기준으로 고정 */
+  box-sizing: border-box;
+  /* 패딩을 넣어도 박스 크기가 커지지 않게 테두리 기준으로 고정 */
 }
 
 body {
@@ -56,16 +66,21 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center;   // 가로 중앙 정렬
+  justify-content: center; // ★ 세로 중앙 정렬 (콘텐츠를 화면 높이의 정중앙으로)
   overflow-x: hidden; // 좌우 스크롤 튀어나가는 현상 방지
-  
+
   // 왼쪽 아래로 뻗어가는 곡선 배경화면 (pattern-curve)
   background-image: url('images/pattern-curve.svg');
   background-repeat: no-repeat;
   background-position: left bottom;
   background-size: 70% auto;
-  
-  @include desktop {    
+
+  @include tablet {
+    background-size: 36% auto; // 태블릿에서 하단 곡선 무늬 크기 최적화
+  }
+
+  @include desktop {
     background-size: auto;
   }
 }
@@ -82,12 +97,17 @@ body {
 }
 
 // --------- 2. 슬라이더 창문(Container) ---------
-// 한 번에 딱 한 개의 슬라이드만 창틀 안에서 보이도록 만듭니다.
 .slider-container {
-  overflow: hidden; 
+  overflow: hidden; // 기본형 (모바일 등에서는 창문 밖으로 나가는 것을 숨김)
   width: 100%;
   position: relative;
   padding: 0; // 패딩 제거
+
+  @include desktop {
+    // 데스크톱에서는 이미지 뒷배경 무늬(.bg-pattern)나 그림자가 
+    // 창문(Container) 바깥으로 크게 튀어나가기 때문에 잘려 보이지 않도록 'visible'로 풀어줍니다.
+    overflow: visible; 
+  }
 }
 
 // --------- 3. 긴 필름(Track) ---------
@@ -97,7 +117,7 @@ body {
   width: 100%;
   align-items: center;
   // 탭이나 화살표 버튼으로 넘어갈 때, 화면이 부드럽게 옆으로 밀리는 시각적 피드백 제공
-  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); 
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 // --------- 4. 개별 슬라이드(Slide) ---------
@@ -107,10 +127,12 @@ body {
   flex-direction: column; // 위쪽: 사진, 아래쪽: 텍스트 (모바일)
   align-items: center;
   position: relative;
-  
+
   @include desktop {
-    flex-direction: row-reverse; // 오른쪽: 사진, 왼쪽: 텍스트 (데스크톱)
-    justify-content: flex-end;   // 텍스트를 왼쪽으로 당김
+    flex-direction: row; 
+    justify-content: flex-end; // 남은 공간을 밀어내어 사진(.slide-visual)이 우측 끝에 붙게 만듭니다.
+    padding-left: 0; // 텍스트를 절대 위치로 고정할 것이므로 불필요한 패딩 제거
+    align-items: center; 
   }
 }
 
@@ -119,37 +141,68 @@ body {
   position: relative;
   width: 100%;
   max-width: 254px; // 모바일용 프로필 이미지 크기
-  margin: 0 auto 82px; // 사진 아래 여백
-  flex-shrink: 0; 
-  
+  margin: 0 auto 82px; // 사진 아래 여백 + 좌우 auto로 가운데 정렬
+  flex-shrink: 0;
+
+  @include tablet {
+    max-width: 405px; // 태블릿: .profile-image(405px)를 감쌀 수 있도록 부모 크기도 함께 확장
+    margin-bottom: 180px; // 태블릿 하단 여백 (138px에서 180px로 상향 조정)
+    // margin: 0 auto 82px 은 모바일 값을 그대로 상속 → 부모가 넓어졌으니 이제 제대로 가운데 정렬됨
+  }
+
   @include desktop {
     max-width: 540px; // 데스크톱 프로필 크기
     margin: 0;
-    // 부모 flex에서 오른쪽 끝으로 밀기 위해 width 고정
+    margin-right: 165px; // 데스크톱 오른쪽 여백 (이제 방해받지 않고 정확히 165px 적용됨)
+    display: flex;       // 내부 요소(이미지) 정렬을 위한 설정
+    align-items: center; // 세로 중앙 정렬
   }
-  
+
   // 뒤에 깔리는 보라색 곡선 무늬창
   .bg-pattern {
     position: absolute;
     top: 53.5%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 326px;  // 배경 무늬 너비
+    width: 326px; // 배경 무늬 너비
     height: 327px; // 배경 무늬 높이
     padding-top: 24px; // 상단 여백
     z-index: -1; // 사진 뒤로 가도록 설정
-    
+
+    @include tablet {
+      width: 520px; // 태블릿 배경 무늬 너비
+      height: 490px; // 태블릿 배경 무늬 높이
+      top: 57%; // 태블릿 배경 무늬 세로 위치
+      padding-top: 0; // 태블릿 배경 무늬 상단 패딩 제거
+    }
+
     @include desktop {
-      width: 130%; // 데스크톱에서는 배경 무늬를 더 크게
+      width: 697px;  // 데스크톱 배경 무늬 너비
+      height: 657px; // 데스크톱 배경 무늬 높이
+      padding: 0;    // 데스크톱 패딩 제거
+      top: 49%;      // 데스크톱 배경 무늬 세로 위치조정
     }
   }
-  
+
   // 인물 사진
   .profile-image {
     width: 100%; // 부모 max-width에 비례
     padding-top: 54px; // 상단 여백
     border-radius: 5px;
     box-shadow: 0 40px 50px -30px rgba(#242471, 0.495); // 그림자: Y 40px, 번짐 50px, 축소 -30px, 색상 #242471 불투명도 49.5%
+
+    @include tablet {
+      width: 405px; // 태블릿 인물 사진 너비
+      height: 475px; // 실제 이미지 높이 403px + padding-top 72px = 475px (border-box 보정)
+      display: block; // 블록 요소로 변환 (margin auto 가 작동하려면 블록이어야 합니다)
+      margin: 0 auto; // 좌우 여백을 자동으로 균등 분배 → 가로 중앙 정렬
+      padding-top: 72px; // 태블릿 인물 사진 상단 여백
+    }
+
+    @include desktop {
+      padding-top: 0; // 데스크톱에서 상단 패딩 제거
+      box-sizing: content-box; // 패딩을 추가해도 이미지(콘텐츠)가 찌그러지지 않고 밖으로 밀어내도록 설정
+    }
   }
 }
 
@@ -159,13 +212,18 @@ body {
   position: relative;
   z-index: 2; // 배경보다 위로 뜨게 설정
   padding: 0 $spacing-400; // 좌우 여백 32px
-  
+
   @include desktop {
-    text-align: left; // 데스크톱에서는 좌측 정렬
-    padding-right: $spacing-600; // 사진과 살짝 겹치듯 여백을 주어, 왼쪽으로 치우치게 함
-    transform: translateX(10%); // 사진 영역 위로 텍스트를 살짝 당겨오는 효과
+    text-align: left;   // 데스크톱에서는 좌측 정렬
+    padding: 0;         // 패딩 제거
+    max-width: 635px;   // 최대 너비 제한
+    position: absolute; // 부양시켜 플렉스 레이아웃의 자리다툼에서 벗어나게 함
+    left: 165px;        // 닻(Anchor)을 화면 왼쪽에서 165px 지점에 단단히 고정
+    top: 50%;           // 부모(slide) 기준 세로 절반
+    transform: translateY(-50%); // 세로 중앙으로 완벽히 정렬
+    z-index: 10;        // [핵심] 사진 위로 텍스트 문단 전체가 겹치도록 z-축 우선순위 부여
   }
-  
+
   // 큰 따옴표 (배경 요소)
   &::before {
     content: '';
@@ -179,10 +237,16 @@ body {
     background-repeat: no-repeat;
     background-size: contain;
     z-index: -1;
-    
+
+    @include tablet {
+      width: 120px;
+      height: 100px;
+      top: -75px; // 요청하신 대로 -45px에서 -75px로 위치 조정했습니다.
+    }
+
     @include desktop {
-      top: -60px;
-      left: 15%; // 데스크톱에선 텍스트 시작점 위쪽 부근에 배치
+      top: -73px; // 데스크톱 따옴표 높이 조정 (기존 -60px에서 -73px로)
+      left: 25%; // 데스크톱 따옴표 가로 위치 조정 (기존 15%에서 25%로)
       width: 120px;
       height: 100px;
     }
@@ -194,32 +258,76 @@ body {
     line-height: 1.35; // 135%
     font-weight: $font-light; // 300
     margin-bottom: $spacing-200; // 16px
-    
+
+    @include tablet {
+      font-size: $body-font-size; // text preset 1: 32px
+      line-height: 1.375; // text preset 1: 137.5%
+      font-weight: $font-light; // text preset 1: light (300)
+      margin-bottom: $spacing-400; // 태블릿 인용구 하단 여백: 32px
+      max-width: 635px; // 요청하신 최소 너비 적용 (시각적 균형)
+      margin-left: auto; // 가운데 정렬을 위한 설정
+      margin-right: auto;
+    }
+
     @include desktop {
+      width: 635px;       // 요청하신 데스크톱 너비 고정 적용
+      margin-left: 0;     // 태블릿의 auto를 해제하고 부모 영역의 맨 왼쪽에 완전히 밀착시킴
       font-size: $body-font-size;
-      margin-bottom: $spacing-600;
+      margin-bottom: 32px; // 요청하신 대로 데스크톱 인용구 하단 여백을 32px로 조정
       line-height: 1.4;
     }
   }
-  
+
   // 직함, 이름 영역
   .author-info {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    
+
+    @include tablet {
+      flex-direction: row; // 태블릿: 이름과 직함을 가로 일렬로
+      align-items: center; // 세로 가운데 정렬
+      justify-content: center; // 가로 가운데 정렬
+      gap: $spacing-100; // 이름과 직함 사이 간격 8px
+    }
+
     @include desktop {
       flex-direction: row; // 이름과 직함을 한 줄로
       align-items: center;
-      gap: $spacing-200;
+      gap: $spacing-100; // 요청하신 대로 간격 8px로 조정
     }
-    
+
     .author-name {
       font-weight: $font-bold;
+
+      @include tablet {
+        font-size: 20px; // Text preset 2
+        line-height: 38px;
+        font-weight: $font-bold; // text preset 2 bold
+      }
+
+      @include desktop {
+        font-size: 20px; // 데스크톱 Text preset 2
+        line-height: 38px;
+        font-weight: $font-bold; // Bold (700)
+      }
     }
+
     .author-title {
       font-weight: $font-medium;
       color: $gray-400; // 회색 처리로 우선순위를 낮춤 (시각적 일관성)
+
+      @include tablet {
+        font-size: 20px; // Text preset 2 (폰트 크기)
+        line-height: 38px; // Text preset 2 (줄 간격)
+        font-weight: $font-medium; // Medium (500)
+      }
+
+      @include desktop {
+        font-size: 20px; // 데스크톱 Text preset 2 (폰트 크기)
+        line-height: 38px; // 데스크톱 Text preset 2 (줄 간격)
+        font-weight: $font-medium; // Medium (500)
+      }
     }
   }
 }
@@ -231,39 +339,53 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
-  width: 80px;  // 컨트롤러 너비
+  width: 80px; // 컨트롤러 너비
   height: 40px; // 컨트롤러 높이
   background: $white;
   border-radius: 30px; // 모서리 둥글게, 알약 모양
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); // 살짝 뜨게 만듦
   overflow: hidden; // 버튼 둥근 모서리가 삐져나가지 않게
   z-index: 10;
-  
+
+  @include tablet {
+    width: 112px; // 태블릿 컨트롤러 너비
+    height: 56px; // 태블릿 컨트롤러 높이
+    top: 50%; // 태블릿 컨트롤러 세로 위치 (기존 52.5%에서 50%로 수정)
+  }
+
   @include desktop {
     // 데스크톱: 이미지 왼쪽 아래 모서리 쪽에 걸치도록 배치
-    top: auto; 
-    bottom: 60px;
-    left: 60%; 
+    width: 112px; // 데스크톱 컨트롤러 너비 추가
+    height: 56px; // 데스크톱 컨트롤러 높이 추가
+    top: auto;
+    bottom: -56px; // 데스크톱 하단 위치 재조정 (60px에서 -56px로 수정)
+    left: 59%;     // 데스크톱 왼쪽 위치 재조정 (60%에서 59%로 수정)
   }
 
   .nav-btn {
     border: none;
     background: transparent;
-    flex: 1;            // 컨트롤러 너비를 두 버튼이 균등하게 나눔 (각 40px)
+    flex: 1; // 컨트롤러 너비를 두 버튼이 균등하게 나눔 (각 40px)
     display: flex;
-    align-items: center;     // 세로 가운데 정렬
+    align-items: center; // 세로 가운데 정렬
     justify-content: center; // 가로 가운데 정렬
     cursor: pointer;
     // 마우스를 올렸을 때 서서히 배경색이 변하는 효과 (사용자 상호작용 피드백)
     transition: background-color 0.2s ease;
-    
-    &:hover, &:focus {
+
+    &:hover,
+    &:focus {
       background-color: $gray-50;
     }
-    
+
     img {
-      width: 6px;  // 화살표 너비
-      height: 11px; // 화살표 높이
+      width: 6px;  // 기본 화살표 너비
+      height: 11px; // 기본 화살표 높이
+
+      @include desktop {
+        width: 8px;  // 데스크톱 화살표 너비 키움 (8px)
+        height: 16px; // 데스크톱 화살표 높이 키움 (16px)
+      }
     }
   }
 }
@@ -275,12 +397,12 @@ body {
   padding: $spacing-200;
   margin-top: $spacing-600;
   color: $gray-400;
-  
+
   a {
     color: $blue-950;
     font-weight: $font-bold;
     text-decoration: none;
-    
+
     &:hover {
       text-decoration: underline;
     }
